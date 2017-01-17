@@ -1,25 +1,15 @@
 package com.example.suyashkumar.vrspeechtrainer;
 
-import android.content.ActivityNotFoundException;
 import android.content.Context;
-import android.content.Intent;
 import android.database.Cursor;
-import android.speech.RecognizerIntent;
-import android.speech.tts.TextToSpeech;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import java.util.ArrayList;
-import java.util.Locale;
-
-import static android.app.Activity.RESULT_OK;
 
 /**
  * Created by SUYASH KUMAR on 1/17/2017.
@@ -34,13 +24,15 @@ public class QuizCardAdapter extends RecyclerView.Adapter<QuizCardAdapter.ViewHo
 
     private Speakable speakable;
     private Listenable listenable;
+    private Turnable turnable;
 
-    public QuizCardAdapter(Cursor cursor, Context ctx, Speakable sp, Listenable ls) {
+    public QuizCardAdapter(Cursor cursor, Context ctx, Speakable sp, Listenable ls, Turnable turnable) {
         super();
         this.cursor = cursor;
         cursor.moveToFirst();
         speakable = sp;
         listenable = ls;
+        this.turnable = turnable;
     }
 
     @Override
@@ -62,7 +54,7 @@ public class QuizCardAdapter extends RecyclerView.Adapter<QuizCardAdapter.ViewHo
 
             word.setText(cursor.getString(cursor.getColumnIndex(DatabaseHelper.word_table_word)));
 
-            Toast.makeText(cardView.getContext(), "Working",Toast.LENGTH_SHORT ).show();
+//            Toast.makeText(cardView.getContext(), "Working",Toast.LENGTH_SHORT ).show();
             speakButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -74,7 +66,15 @@ public class QuizCardAdapter extends RecyclerView.Adapter<QuizCardAdapter.ViewHo
             listenButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    listenable.listen(cardView);
+                    String text = (String)word.getText();
+                    listenable.listen(cardView,text);
+                }
+            });
+
+            skipButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    turnable.move();
                 }
             });
         }

@@ -4,7 +4,7 @@
     xmlns:cardView="http://schemas.android.com/apk/res-auto"
     android:layout_height="300dp"
     android:layout_width="match_parent"
-    android:layout_gravity="center"
+    android:layout_marginTop="300dp"
     android:layout_margin="10dp"
     cardView:cardCornerRadius="10dp"
     >
@@ -32,29 +32,37 @@
                 android:id="@+id/card_word" />
 
             <Button
+                android:id="@+id/card_speak"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="5dp"
                 android:text="Listen"
-                android:id="@+id/card_listen" />
+                />
 
         </LinearLayout>
+
+        <TextView
+            android:id="@+id/matches_mark"
+            android:layout_gravity="center_horizontal"
+            android:text="MATCHES"
+            android:visibility="gone"/>
+
         <Button
+            android:id="@+id/card_listen"
             android:text="speak"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom"
+            android:layout_gravity="bottom|center_horizontal"
             android:layout_marginBottom="70dp"
-            android:id="@+id/card_speak"
             />
 
 
     </GridLayout>
     <Button
-        android:text="skip"
+        android:text="next"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
+        android:layout_gravity="bottom|center_horizontal"
         android:id="@+id/card_skip"
         android:layout_marginBottom="10dp"
         />

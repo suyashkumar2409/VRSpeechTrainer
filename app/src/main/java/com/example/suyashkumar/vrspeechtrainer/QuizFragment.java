@@ -1,6 +1,7 @@
 package com.example.suyashkumar.vrspeechtrainer;
 
 
+import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
@@ -14,14 +15,14 @@ import android.speech.tts.TextToSpeech;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CursorAdapter;
+import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.ArrayList;
 import java.util.Locale;
 
 import static android.app.Activity.RESULT_OK;
@@ -30,12 +31,14 @@ import static android.app.Activity.RESULT_OK;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class QuizFragment extends Fragment implements Listenable, Speakable{
+public class QuizFragment extends Fragment implements Listenable, Speakable, Turnable {
 
     private TextToSpeech tts;
     private boolean speechEnabled = false;
     private Context ctx;
-    private RecyclerView view;
+    private View view;
+    private RecyclerView rv;
+    private String trueWord;
 
     private Cursor cursor;
     private DatabaseHelper helper;
@@ -48,7 +51,8 @@ public class QuizFragment extends Fragment implements Listenable, Speakable{
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        view =  (RecyclerView)inflater.inflate(R.layout.fragment_quiz, container, false);
+        view =  inflater.inflate(R.layout.fragment_quiz, container, false);
+        rv = (RecyclerView) view.findViewById(R.id.quiz_recycler);
         ctx = view.getContext();
 
         initSpeak();
@@ -63,10 +67,28 @@ public class QuizFragment extends Fragment implements Listenable, Speakable{
                     null,null,null,null,null
             );
 
-            QuizCardAdapter adapter = new QuizCardAdapter(cursor, ctx, this, this);
-            view.setAdapter(adapter);
-            LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
-            view.setLayoutManager(layoutManager);
+            QuizCardAdapter adapter = new QuizCardAdapter(cursor, ctx, this, this, this);
+            rv.setAdapter(adapter);
+            LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false){
+                @Override
+                public boolean canScrollHorizontally(){
+                    return true;
+                }
+            };
+            rv.setLayoutManager(layoutManager);
+//            view.addItemDecoration(new RecyclerView.ItemDecoration() {
+//
+//                @Override
+//                public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
+//                    if (view instanceof CardView) {
+//                        int totalWidth = parent.getWidth();
+//                        int cardWidth = getResources().getDimensionPixelOffset(parent.getWidth());
+//                        int sidePadding = (totalWidth - cardWidth) / 2;
+//                        sidePadding = Math.max(0, sidePadding);
+//                        outRect.set(sidePadding, 0, sidePadding, 0);
+//                    }
+//                }
+//            });
         }
         catch(SQLiteException e)
         {
@@ -77,7 +99,8 @@ public class QuizFragment extends Fragment implements Listenable, Speakable{
 
 
     @Override
-    public void listen(CardView cardView) {
+    public void listen(CardView cardView, String trueWord) {
+        this.trueWord = trueWord;
         promptSpeechInput(cardView);
     }
 
@@ -143,13 +166,30 @@ public class QuizFragment extends Fragment implements Listenable, Speakable{
             case REQ_CODE_SPEECH_INPUT: {
                 if (resultCode == RESULT_OK && null != data) {
 
-                    ArrayList<String> result = data
-                            .getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+                    String result = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS).get(0);
                     // Listening stuff here
+                    float confidence = data.getFloatArrayExtra(RecognizerIntent.EXTRA_CONFIDENCE_SCORES)[0];
+
+                    TextView resultDisplay = (TextView)view.findViewById(R.id.matches_mark);
+                    String setVal = String.valueOf(confidence);
+                    if(result.equalsIgnoreCase(trueWord))
+                    {
+                        setVal += " - MATCHES";
+                    }
+
+                    resultDisplay.setText(setVal);
+                    resultDisplay.setVisibility(View.VISIBLE);
                 }
                 break;
             }
 
         }
+    }
+
+    @Override
+    public void move() {
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        ((Activity)ctx).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        rv.smoothScrollBy(displayMetrics.widthPixels, 0);
     }
 }

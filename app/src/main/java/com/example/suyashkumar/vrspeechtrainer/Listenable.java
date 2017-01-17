@@ -7,5 +7,5 @@ import android.support.v7.widget.CardView;
  */
 public interface Listenable {
     int REQ_CODE_SPEECH_INPUT = 100;
-    public void listen(CardView cardView);
+    public void listen(CardView cardView, String trueWord);
 }
